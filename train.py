@@ -15,16 +15,14 @@ wd = 0.0001 # weight decay
 num_epochs = 10
 d = 32 # reduced dimension
 # d = 1001
-M = 24 # number of channels
+# M = 24 # number of canonical channels
+M = 22 # number of original channels
 b = 64 # batch size
 
 model = EEGConvNet(num_channels=M, num_classes=3)
 print(model)
 # nn.init.xavier_uniform_(model.embedding_layer.weight)  
 # nn.init.xavier_uniform_(model.map_layer.weight)  
-x = torch.rand(b, M, d)
-out = model(x)
-print(out.shape)
 
 # Loss function
 criterion = nn.CrossEntropyLoss()
@@ -32,17 +30,13 @@ criterion = nn.CrossEntropyLoss()
 # Optimizer with L2 regularization
 optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
 
-# Create random input tensor and labels
-input_data = torch.rand(b, M, d)
-labels = torch.randint(0, 3, (b,))
-print(labels.shape)
 
 # Training loop
 for epoch in range(num_epochs):
     for i, (inputs, labels) in enumerate(train_dataloader):
-
         optimizer.zero_grad()
-        output = model(input_data)
+        inputs = inputs.float()
+        output = model(inputs)
         loss = criterion(output, labels)
         loss.backward()
         optimizer.step()

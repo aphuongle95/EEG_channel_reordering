@@ -10,7 +10,7 @@ paradigm = LeftRightImagery()
 print(paradigm.datasets)
 # Get dataset
 dataset = BNCI2014001()
-# dataset.subject_list = [1] # quick 
+dataset.subject_list = [1] # quick 
 X, labels, meta = paradigm.get_data(dataset=dataset)
 X = X[:, :, :32] # quick, rm when data is mapped
 
