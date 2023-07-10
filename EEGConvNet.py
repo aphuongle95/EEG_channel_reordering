@@ -45,13 +45,14 @@ class EEGConvNet(nn.Module):
         
         return x
     
-d = 32 # reduced dimension
-M = 24 # number of channels
-b = 3 # batch size
-model = EEGConvNet(num_channels=M, num_classes=3)
-print(model)
-# nn.init.xavier_uniform_(model.embedding_layer.weight)  
-# nn.init.xavier_uniform_(model.map_layer.weight)  
-x = torch.rand(b, M, d)
-out = model(x)
-print(out.shape)
+if __name__ == "__main__":
+    d = 32 # reduced dimension
+    M = 24 # number of channels
+    b = 3 # batch size
+    model = EEGConvNet(num_channels=M, num_classes=3)
+    print(model)
+    # nn.init.xavier_uniform_(model.embedding_layer.weight)  
+    # nn.init.xavier_uniform_(model.map_layer.weight)  
+    x = torch.rand(b, M, d)
+    out = model(x)
+    print(out.shape)
