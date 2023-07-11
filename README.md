@@ -8,4 +8,4 @@ Current stages:
 - [ ] implement attentive reordering with canonical keys and values
 
 Problems:
-- when running with CHARM remapping, the loss becomes NAN after sometime
+- when running with convolutional reordering, the loss becomes NAN after some epochs
