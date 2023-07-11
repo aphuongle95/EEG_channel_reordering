@@ -7,15 +7,18 @@ import numpy as np
 torch.manual_seed(0)  
 
 def softreorder_elementwise(inp, emb, i, j):
-        det = 0
-        for col in inp.t():
-            inc = torch.exp(torch.sum(torch.matmul(emb[i].view(-1, 1), col.view(1, -1))))
-            det += inc 
-        nom = torch.exp(torch.sum(torch.matmul(emb[i].view(-1, 1), emb.t()[j].view(1, -1))))
-        return nom / det
+    det = 0
+    c_i = emb[i]
+    h_j = emb.t()[j]
+    for j_ in range(inp.shape[1]):
+        h_j_ = inp.t()[j_]
+        inc = torch.exp(torch.sum(torch.matmul(c_i.view(-1, 1), h_j_.view(1, -1))))
+        det = torch.add(det, inc)
+    nom = torch.exp(torch.sum(torch.matmul(c_i.view(-1, 1), h_j.view(1, -1))))
+    return nom / det
 
 def softreorder(inp, emb):
-    remap = torch.zeros(emb.shape)
+    remap = torch.empty(emb.shape)
     for i in range(emb.shape[0]):
         for j in range(emb.shape[1]):
             out = softreorder_elementwise(inp, emb, i, j)
@@ -31,8 +34,6 @@ class ConvMaxPool(nn.Module):
         self.max_pool = nn.AdaptiveMaxPool1d(1)
 
     def forward(self, x):
-        # x = x.unsqueeze(1)  # Add a dimension for the channel
-        # x = x.view(b * d, l)
         print(x.shape)
         x = x.transpose(1, 2).contiguous()
         print(x.shape)
@@ -58,9 +59,9 @@ class Embedding(nn.Module):
         
     def forward(self, x):
         self._check_sanity(x)
-        emb = torch.zeros((x.shape[0], self.channels, self.dimension))
+        emb = torch.empty((x.shape[0], self.channels, self.dimension))
         for t in range(x.shape[0]):
-            emb[t] = softreorder(emb[t], self.weight)
+            emb[t] = softreorder(x[t], self.weight)
         return emb
         
     

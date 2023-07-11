@@ -4,14 +4,15 @@ import torch.nn as nn
 from CHARM import CHARM
 
 class EEGConvNet(nn.Module):
-    def __init__(self, dimension, length, num_channels, num_classes):
+    def __init__(self, use_mapping, length, original_channels, dimension, num_channels, num_classes):
         super(EEGConvNet, self).__init__()
         self.dimension = dimension
         self.num_channels = num_channels
         self.num_classes = num_classes
-        self.instance_norm = nn.InstanceNorm1d(num_channels, affine=True)
-        
-        self.charm = CHARM(dimension=dimension, channels=num_channels, length=length)
+        self.instance_norm = nn.InstanceNorm1d(original_channels, affine=True)
+        self.use_mapping = use_mapping
+        if use_mapping:
+            self.charm = CHARM(dimension=dimension, channels=num_channels, length=length)
         self.conv_block1 = self._create_conv_block(num_channels, features=256, kernel=8, conv_stride=1, pooling=2, pool_stride=2)
         self.conv_block2 = self._create_conv_block(256, features=256, kernel=3, conv_stride=1, pooling=2, pool_stride=2)
         self.conv_block3 = self._create_conv_block(256, features=256, kernel=3, conv_stride=1, pooling=2, pool_stride=2)
@@ -29,11 +30,13 @@ class EEGConvNet(nn.Module):
         )
 
     def forward(self, inp):
-        print(inp.shape)
-        x = self.CHARM(inp)
-        print(inp.shape)
-        x = self.instance_norm(inp)
+        x = inp
         print(x.shape)
+        x = self.instance_norm(x)
+        print(x.shape)
+        if self.use_mapping:
+            x = self.charm(x)
+            print(x.shape)
         x = self.conv_block1(x)
         print(x.shape)
         x = self.conv_block2(x)
