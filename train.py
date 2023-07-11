@@ -22,10 +22,10 @@ b = 64 # batch size
 train_dataloader = create_data_loader(b)
 
 # no mapping
-model = EEGConvNet(use_mapping=False, dimension=l, length=l, num_channels=N, num_classes=3)
+model = EEGConvNet(use_mapping=False, length=l, original_channels=N, dimension=l, num_channels=N, num_classes=3)
 # with charm mapping
 # model = EEGConvNet(use_mapping=True, length=l, original_channels=N, dimension=d, num_channels=M, num_classes=3)
-
+# nn.init.xavier_uniform_(model.charm.embedding_layer.weight)  
 
 print(model)
 # nn.init.xavier_uniform_(model.embedding_layer.weight)  
@@ -49,6 +49,7 @@ for epoch in range(num_epochs):
         loss.backward()
         optimizer.step()
         
+        # print(model.charm.embedding_layer.weight.grad)
         # Log loss and accuracy to wandb
         accuracy = (output.argmax(dim=1) == labels).float().mean()
         wandb.log({"Loss": loss.item(), "Accuracy": accuracy.item()})
