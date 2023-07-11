@@ -1,17 +1,22 @@
 import torch
 import torch.nn as nn
 
+from CHARM import CHARM
+
 class EEGConvNet(nn.Module):
-    def __init__(self, num_channels, num_classes):
+    def __init__(self, dimension, length, num_channels, num_classes):
         super(EEGConvNet, self).__init__()
+        self.dimension = dimension
         self.num_channels = num_channels
         self.num_classes = num_classes
         self.instance_norm = nn.InstanceNorm1d(num_channels, affine=True)
+        
+        self.charm = CHARM(dimension=dimension, channels=num_channels, length=length)
         self.conv_block1 = self._create_conv_block(num_channels, features=256, kernel=8, conv_stride=1, pooling=2, pool_stride=2)
         self.conv_block2 = self._create_conv_block(256, features=256, kernel=3, conv_stride=1, pooling=2, pool_stride=2)
         self.conv_block3 = self._create_conv_block(256, features=256, kernel=3, conv_stride=1, pooling=2, pool_stride=2)
         self.conv_block4 = self._create_conv_block(256, features=512, kernel=3, conv_stride=1, pooling=2, pool_stride=2)
-        self.max_pool = nn.AdaptiveMaxPool2d(1)
+        self.max_pool = nn.AdaptiveMaxPool1d(1)
         self.fc = nn.Linear(512, num_classes)
         
 
@@ -25,6 +30,8 @@ class EEGConvNet(nn.Module):
 
     def forward(self, inp):
         print(inp.shape)
+        x = self.CHARM(inp)
+        print(inp.shape)
         x = self.instance_norm(inp)
         print(x.shape)
         x = self.conv_block1(x)
@@ -36,9 +43,9 @@ class EEGConvNet(nn.Module):
         x = self.conv_block4(x)
         print("...")
         print(x.shape)
-        # x = self.max_pool(x)
-        # print(x.shape)
-        x = x.view(x.size(0), -1)
+        x = self.max_pool(x)
+        print(x.shape)
+        x = x.squeeze()
         print(x.shape)
         x = self.fc(x)
         print(x.shape)
@@ -47,12 +54,14 @@ class EEGConvNet(nn.Module):
     
 if __name__ == "__main__":
     d = 32 # reduced dimension
+    length = 1001 # original signal length
     M = 24 # number of channels
     b = 3 # batch size
-    model = EEGConvNet(num_channels=M, num_classes=3)
+    
+    model = EEGConvNet(dimension=d, length=length, num_channels=M, num_classes=3)
     print(model)
     # nn.init.xavier_uniform_(model.embedding_layer.weight)  
     # nn.init.xavier_uniform_(model.map_layer.weight)  
-    x = torch.rand(b, M, d)
+    x = torch.rand(b, 22, 1001)
     out = model(x)
     print(out.shape)

@@ -29,7 +29,6 @@ class ConvMaxPool(nn.Module):
         # self.conv_layer = nn.Conv1d(l, d, k, stride=2)
         self.conv_layer = nn.Conv1d(in_channels=in_channels, out_channels=out_channels, kernel_size=k, stride=1, padding=1)
         self.max_pool = nn.AdaptiveMaxPool1d(1)
-        self.output_dim = d
 
     def forward(self, x):
         # x = x.unsqueeze(1)  # Add a dimension for the channel
